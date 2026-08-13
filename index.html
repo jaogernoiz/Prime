@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prime Factorization Calculator</title>
+  <meta name="description" content="Break any positive integer down into its prime factors. Fast, clean, and responsive — no installation needed.">
+  <meta name="theme-color" content="#f2f7fc">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a1220">
+
+  <!-- Inter from Google Fonts with system-font fallbacks (works offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M6 16h5l2-6 5 12 3-6h5' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <!-- Apply the saved theme before first paint to avoid a flash of light -->
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("prime-factorization-theme");
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+      </svg>
+      <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <header class="card-header">
+      <span class="brand-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12h4l2-6 4 12 2-6h6"></path>
+        </svg>
+      </span>
+      <h1 class="title">Prime Factorization</h1>
+      <p class="subtitle">Break any positive integer down into its prime factors.</p>
+    </header>
+
+    <form id="factorForm" novalidate>
+      <div class="field">
+        <label class="field-label" for="numberInput">Enter a number</label>
+        <input
+          class="input"
+          type="text"
+          id="numberInput"
+          name="number"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="inputHint"
+        >
+        <p class="field-hint" id="inputHint">Range: 1 – 1,000,000,000</p>
+        <p class="error-msg" id="errorMessage" role="alert">
+          <svg class="error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 8v4"></path>
+            <path d="M12 16h.01"></path>
+          </svg>
+          <span id="errorText"></span>
+        </p>
+      </div>
+
+      <button class="btn" type="submit">Submit</button>
+    </form>
+
+    <section class="result" aria-labelledby="resultHeading">
+      <div class="result-box" id="resultBox" aria-live="polite">
+        <h2 class="result-eyebrow" id="resultHeading">Result</h2>
+        <p class="equation" id="equation"></p>
+        <p class="result-exponents" id="exponentLine" hidden></p>
+        <p class="result-note" id="resultNote"></p>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="noscript">This calculator requires JavaScript to work.</p>
+    </noscript>
+  </main>
+
+  <script src="javascript.js"></script>
+</body>
+</html>

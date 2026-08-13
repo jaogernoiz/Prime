@@ -1,0 +1,573 @@
+/* ==========================================================================
+   Prime Factorization Calculator
+   Modern Medical / Clean / Premium
+   ========================================================================== */
+
+/* ---------- 1. Design tokens ---------- */
+:root {
+  /* Color palette: white + dark slate + medical blues */
+  color-scheme: light;
+  --bg: #f2f7fc;
+  --surface: #ffffff;
+  --border: #e6edf5;
+  --border-strong: #cfddec;
+
+  --text: #0f172a;
+  --text-muted: #5b6b82;
+  --text-faint: #93a4ba;
+
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-soft: #eaf2ff;
+  --primary-softer: #f7faff;
+
+  --error: #dc2626;
+  --error-bg: #fef3f3;
+  --error-border: #fbd5d5;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.05), 0 18px 44px -14px rgba(15, 23, 42, 0.14);
+  --shadow-btn: 0 8px 20px -6px rgba(37, 99, 235, 0.45);
+  --shadow-btn-hover: 0 12px 28px -8px rgba(37, 99, 235, 0.55);
+
+  /* Extra tokens shared by both themes */
+  --bg-glow: #e7f0fc;
+  --border-hover: #b9cbdf;
+  --focus-ring: rgba(37, 99, 235, 0.14);
+  --error-ring: rgba(220, 38, 38, 0.12);
+  --primary-soft-strong: #dbeafe;
+  --result-border: #d6e5fb;
+  --pill-bg: #ffffff;
+  --pill-border: #cfe1ff;
+  --btn-from: #3b82f6;
+  --btn-to: #1d4ed8;
+
+  /* Shape */
+  --r-lg: 24px;
+  --r-md: 14px;
+  --r-sm: 10px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- 1b. Dark theme ----------
+   Two sources of truth, kept in sync:
+     - [data-theme="dark"]            -> the user switched manually
+     - prefers-color-scheme            -> system preference (unless the
+                                            user forced "light") */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0a1220;
+  --bg-glow: #15243c;
+  --surface: #0e1a2c;
+  --border: #1e2d45;
+  --border-strong: #2b3f5e;
+  --border-hover: #3d5377;
+  --text: #e8eef7;
+  --text-muted: #a0b3cc;
+  --text-faint: #6f829f;
+  --primary: #4d8df6;
+  --primary-dark: #7db3ff;
+  --primary-soft: #17294b;
+  --primary-soft-strong: #1e3a69;
+  --primary-softer: #0f1f37;
+  --result-border: #24426f;
+  --pill-bg: #132540;
+  --pill-border: #2c4b7d;
+  --error: #f08a8a;
+  --error-bg: #2a1215;
+  --error-border: #522229;
+  --focus-ring: rgba(77, 141, 246, 0.3);
+  --error-ring: rgba(240, 138, 138, 0.22);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 44px -14px rgba(0, 0, 0, 0.55);
+  --shadow-btn: 0 8px 20px -6px rgba(37, 99, 235, 0.3);
+  --shadow-btn-hover: 0 12px 28px -8px rgba(37, 99, 235, 0.45);
+  --btn-from: #2f6fe8;
+  --btn-to: #1e40af;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0a1220;
+    --bg-glow: #15243c;
+    --surface: #0e1a2c;
+    --border: #1e2d45;
+    --border-strong: #2b3f5e;
+    --border-hover: #3d5377;
+    --text: #e8eef7;
+    --text-muted: #a0b3cc;
+    --text-faint: #6f829f;
+    --primary: #4d8df6;
+    --primary-dark: #7db3ff;
+    --primary-soft: #17294b;
+    --primary-soft-strong: #1e3a69;
+    --primary-softer: #0f1f37;
+    --result-border: #24426f;
+    --pill-bg: #132540;
+    --pill-border: #2c4b7d;
+    --error: #f08a8a;
+    --error-bg: #2a1215;
+    --error-border: #522229;
+    --focus-ring: rgba(77, 141, 246, 0.3);
+    --error-ring: rgba(240, 138, 138, 0.22);
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 44px -14px rgba(0, 0, 0, 0.55);
+    --shadow-btn: 0 8px 20px -6px rgba(37, 99, 235, 0.3);
+    --shadow-btn-hover: 0 12px 28px -8px rgba(37, 99, 235, 0.45);
+    --btn-from: #2f6fe8;
+    --btn-to: #1e40af;
+  }
+}
+
+/* ---------- 2. Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background: radial-gradient(1100px 520px at 50% -12%, var(--bg-glow) 0%, transparent 62%), var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 3. Calculator card ---------- */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  padding: clamp(30px, 5vw, 46px);
+  /* Card fade-in on page load */
+  animation: card-in 0.5s var(--ease) both;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 3b. Theme toggle ---------- */
+.theme-toggle {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), border-color 0.25s var(--ease),
+    background-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px) scale(1.05);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.theme-toggle:active {
+  transform: scale(0.94);
+}
+
+.theme-toggle:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+/* Icon swap — JS adds/removes the .dark class on the button */
+.theme-toggle .icon-sun {
+  display: block;
+}
+.theme-toggle .icon-moon {
+  display: none;
+}
+.theme-toggle.dark .icon-sun {
+  display: none;
+}
+.theme-toggle.dark .icon-moon {
+  display: block;
+}
+
+/* ---------- 4. Header ---------- */
+.card-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand-icon {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-soft), var(--primary-soft-strong));
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.6rem, 4.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 10px auto 0;
+  max-width: 32ch;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ---------- 5. Form ---------- */
+.field {
+  margin-bottom: 18px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-md);
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease),
+    background-color 0.25s var(--ease);
+}
+
+.input::placeholder {
+  color: var(--text-faint);
+}
+
+.input:hover {
+  border-color: var(--border-hover);
+}
+
+/* Smooth focus glow */
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.input.invalid {
+  border-color: var(--error);
+  box-shadow: 0 0 0 4px var(--error-ring);
+}
+
+/* Avoid the yellow autofill flash in Chrome */
+.input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  -webkit-text-fill-color: var(--text);
+}
+
+.field-hint {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-faint);
+}
+
+/* Inline error — fades / slides in smoothly, never uses alert() */
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--error);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: var(--r-sm);
+  opacity: 0;
+  transform: translateY(-4px);
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease),
+    visibility 0.3s;
+}
+
+.error-msg.show {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+}
+
+.error-icon {
+  flex: none;
+}
+
+/* ---------- 6. Submit button ---------- */
+.btn {
+  width: 100%;
+  padding: 15px 20px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--btn-from), var(--btn-to));
+  border: none;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-btn);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), box-shadow 0.25s var(--ease),
+    filter 0.25s var(--ease);
+}
+
+/* Hover: lift + deepen shadow, subtle scale */
+.btn:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-btn-hover);
+  filter: brightness(1.04);
+}
+
+/* Click: press back down */
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-btn);
+  filter: brightness(0.98);
+}
+
+/* Keyboard users get a clear focus ring (no ring on mouse click) */
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-btn), 0 0 0 4px rgba(147, 197, 253, 0.6);
+}
+
+/* ---------- 7. Result ---------- */
+.result {
+  margin-top: 28px;
+}
+
+.result-box {
+  background: var(--primary-softer);
+  border: 1px solid var(--result-border);
+  border-radius: 16px;
+  padding: 22px 20px;
+  text-align: center;
+  /* Hidden until the first calculation, then fades + slides in */
+  opacity: 0;
+  transform: translateY(12px);
+  visibility: hidden;
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease),
+    visibility 0.35s;
+}
+
+.result-box.visible {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+}
+
+.result-eyebrow {
+  margin: 0 0 12px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* "60 = 2 × 2 × 3 × 5" */
+.equation {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.equation .number {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.equation .equals {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.equation .times {
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+/* Each prime factor as a premium pill/badge */
+.factor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 5px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  /* Pills pop in with a subtle stagger (capped so long results stay snappy) */
+  animation: factor-in 0.3s var(--ease) both;
+  animation-delay: calc(min(var(--i, 0), 8) * 45ms);
+}
+
+@keyframes factor-in {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Compact exponent form (2² × 3 × 5) — only shown when a factor repeats */
+.result-exponents {
+  margin: 10px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-faint);
+}
+
+/* Notes under the equation: "97 is a prime number", "1 has no prime factors" */
+.result-note {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.result-note.is-prime {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+/* Fallback message when JavaScript is disabled */
+.noscript {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ---------- 8. Responsive ---------- */
+@media (max-width: 768px) {
+  .card {
+    padding: 32px 28px;
+  }
+
+  .title {
+    font-size: 1.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 18px 12px;
+  }
+
+  .card {
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .theme-toggle {
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .card-header {
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .input {
+    padding: 13px 14px;
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 14px 18px;
+  }
+
+  .result {
+    margin-top: 22px;
+  }
+
+  .result-box {
+    padding: 18px 14px;
+  }
+
+  .factor {
+    padding: 4px 10px;
+    font-size: 0.875rem;
+  }
+}
+
+/* ---------- 9. Accessibility: reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
